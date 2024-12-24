@@ -142,6 +142,7 @@ export class AgentRuntime implements IAgentRuntime {
     services: Map<ServiceType, Service> = new Map();
     memoryManagers: Map<string, IMemoryManager> = new Map();
     cacheManager: ICacheManager;
+    clients: Record<string, any>;
 
     registerMemoryManager(manager: IMemoryManager): void {
         if (!manager.tableName) {
@@ -233,6 +234,10 @@ export class AgentRuntime implements IAgentRuntime {
 
         this.#conversationLength =
             opts.conversationLength ?? this.#conversationLength;
+
+        if (!opts.databaseAdapter) {
+            throw new Error("No database adapter provided");
+        }
         this.databaseAdapter = opts.databaseAdapter;
         // use the character id if it exists, otherwise use the agentId if it is passed in, otherwise use the character name
         this.agentId =
@@ -248,15 +253,14 @@ export class AgentRuntime implements IAgentRuntime {
             this.agentId,
             this.character.name,
             this.character.name
-        );
-        this.ensureParticipantExists(this.agentId, this.agentId);
+        ).then(() => {
+            // postgres needs the user to exist before you can add a participant
+            this.ensureParticipantExists(this.agentId, this.agentId);
+        });
 
         elizaLogger.success("Agent ID", this.agentId);
 
         this.fetch = (opts.fetch as typeof fetch) ?? this.fetch;
-        if (!opts.databaseAdapter) {
-            throw new Error("No database adapter provided");
-        }
 
         this.cacheManager = opts.cacheManager;
 
@@ -403,6 +407,25 @@ export class AgentRuntime implements IAgentRuntime {
         ) {
             await this.processCharacterKnowledge(this.character.knowledge);
         }
+    }
+
+    async stop() {
+      elizaLogger.debug('runtime::stop - character', this.character)
+      // stop services, they don't have a stop function
+        // just initialize
+
+      // plugins
+        // have actions, providers, evaluators (no start/stop)
+        // services (just initialized), clients
+
+      // client have a start
+      for(const cStr in this.clients) {
+        const c = this.clients[cStr]
+        elizaLogger.log('runtime::stop - requesting', cStr, 'client stop for', this.character.name)
+        c.stop()
+      }
+      // we don't need to unregister with directClient
+      // don't need to worry about knowledge
     }
 
     /**
