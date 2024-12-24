@@ -572,7 +572,7 @@ const startAgents = async () => {
     }
 };
 
-elizaLogger.verbose = true;
+// elizaLogger.verbose = true;
 
 startAgents().catch((error) => {
     elizaLogger.error("Unhandled error in startAgents:", error);
