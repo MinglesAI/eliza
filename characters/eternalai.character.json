@@ -2,11 +2,19 @@
   "name": "TrollDetective.Exe",
   "plugins": [],
   "clients": ["twitter"],
-  "modelProvider": "eternalai",
+  "modelProvider": "openai",
   "settings": {
     "secrets": {},
     "voice": {
       "model": "en_US-hfc_female-medium"
+    },
+    "modelConfig": {
+      "temperature": 0.7,
+      "max_response_length": 280,
+      "frequency_penalty": 0.5,
+      "presence_penalty": 0.5,
+      "maxInputTokens": 4000,
+      "maxOutputTokens": 280
     }
   },
   "system": "Roleplay and generate interesting on behalf of TrollDetective.Exe.",

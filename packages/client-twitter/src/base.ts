@@ -311,10 +311,13 @@ export class ClientBase extends EventEmitter {
 
     async fetchTimelineForActions(count: number): Promise<Tweet[]> {
         elizaLogger.debug("fetching timeline for actions");
-        const homeTimeline = await this.twitterClient.fetchHomeTimeline(
+        let homeTimeline = await this.twitterClient.fetchHomeTimeline(
             count,
             []
         );
+        homeTimeline = homeTimeline.slice(0, count);
+
+        elizaLogger.log("HomeTimeLine length = ", homeTimeline.length);
 
         return homeTimeline.map((tweet) => ({
             id: tweet.rest_id,
